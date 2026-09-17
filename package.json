@@ -4,13 +4,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "tsx agent.ts"
+    "start": "tsx src/main.ts"
   },
   "dependencies": {
     "@langchain/core": "^1.2.11",
     "@langchain/openai": "^1.5.13",
     "deepagents": "^1.13.5",
-    "langchain": "^1.5.11"
+    "langchain": "^1.5.11",
+    "marked": "15",
+    "marked-terminal": "^7.3.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/node": "^22.20.3",
