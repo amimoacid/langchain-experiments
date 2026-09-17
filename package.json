@@ -1,0 +1,19 @@
+{
+  "name": "langchain-experiments",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "tsx agent.ts"
+  },
+  "dependencies": {
+    "@langchain/core": "^1.2.11",
+    "deepagents": "^1.13.5",
+    "langchain": "^1.5.11"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.3",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
+  }
+}
