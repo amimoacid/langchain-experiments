@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@langchain/core": "^1.2.11",
+    "@langchain/openai": "^1.5.13",
     "deepagents": "^1.13.5",
     "langchain": "^1.5.11"
   },
