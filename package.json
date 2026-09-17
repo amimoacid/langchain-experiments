@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "tsx src/main.ts"
+    "start": "tsx src/main.ts",
+    "web": "tsx src/server.ts"
   },
   "dependencies": {
     "@langchain/core": "^1.2.11",
