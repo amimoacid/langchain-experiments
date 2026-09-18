@@ -4,33 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Research sweep</title>
-    <link rel="stylesheet" href="/style.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23c8102e'/%3E%3C/svg%3E"
+    />
   </head>
   <body>
-    <header>
-      <h1>Research sweep</h1>
-      <p class="lede">
-        One query. Each cell writes a draft, a skeptic marks weak spans, then a
-        rewrite uses those notes. The key lists each axis once.
-      </p>
-    </header>
-
-    <form id="sweep">
-      <label>
-        Query
-        <textarea name="query" rows="2" required></textarea>
-      </label>
-      <div class="actions">
-        <p id="count"></p>
-        <button type="button" id="clear">Clear results</button>
-        <button type="submit" name="mode" value="cache">Run sweep</button>
-        <button type="submit" name="mode" value="fresh">
-          Run sweep + bust cache
-        </button>
-      </div>
-    </form>
-
-    <div id="board" class="board"></div>
-    <script type="module" src="/app.js"></script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

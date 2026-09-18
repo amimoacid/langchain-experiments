@@ -14,11 +14,15 @@
     "langchain": "^1.5.11",
     "marked": "15",
     "marked-terminal": "^7.3.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/node": "^22.20.3",
+    "@vitejs/plugin-react": "^6.1.1",
     "tsx": "^4.23.13",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vite": "^8.3.0"
   }
 }

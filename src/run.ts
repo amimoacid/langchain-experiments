@@ -161,6 +161,25 @@ export type CellResult = {
 };
 
 export type Phase = "research" | "skeptic" | "revise";
+export type BriefPhase = "reduce" | "chief";
+
+const tallySchema = z.object({
+  items: z.array(
+    z.object({
+      point: z.string(),
+      count: z.number(),
+      variants: z.array(z.string()),
+    }),
+  ),
+});
+
+const chiefSchema = z.object({
+  title: z.string(),
+  summary: z.string(),
+  consensus: z.array(z.string()),
+  disputes: z.array(z.string()),
+  nextSteps: z.array(z.string()),
+});
 
 /**
  * Run one research cell. The query stays fixed. Schema, strategy, and tools change.
@@ -333,7 +352,142 @@ export async function runRevise(input: {
   }
 }
 
-function fail(started: number, snippet: string, error: unknown): CellResult {
+/**
+ * Tally recurring claims across revised reports.
+ * @see {@link https://docs.langchain.com/oss/javascript/langchain/structured-output | Structured output}
+ */
+export async function runReduceResearch(input: {
+  query: string;
+  corpus: unknown;
+}): Promise<CellResult> {
+  const snippet =
+    "createDeepAgent({ responseFormat: providerStrategy(tally) })";
+  const started = Date.now();
+  try {
+    const model = await initChatModel(
+      process.env.MODEL ?? "openai:gpt-5.6-luna",
+      { useResponsesApi: true },
+    );
+    const agent = createDeepAgent({
+      model,
+      tools: [],
+      systemPrompt: readFileSync(
+        new URL("./reduce-research.md", import.meta.url),
+        "utf8",
+      ),
+      responseFormat: providerStrategy(tallySchema),
+    });
+    const result = (await agent.invoke({
+      messages: [
+        new HumanMessage(
+          `Query: ${input.query}\n\nRevisions:\n${dump(input.corpus)}`,
+        ),
+      ],
+    })) as { structuredResponse?: unknown; messages: unknown[] };
+    await awaitAllCallbacks();
+    return {
+      ok: true,
+      ms: Date.now() - started,
+      snippet,
+      tokens: tokensOf(result.messages),
+      value: result.structuredResponse ?? { items: [] },
+    };
+  } catch (error) {
+    return fail(started, snippet, error);
+  }
+}
+
+/**
+ * Tally recurring skeptic concerns across cells.
+ * @see {@link https://docs.langchain.com/oss/javascript/langchain/structured-output | Structured output}
+ */
+export async function runReduceSkeptic(input: {
+  query: string;
+  corpus: unknown;
+}): Promise<CellResult> {
+  const snippet =
+    "createDeepAgent({ responseFormat: providerStrategy(tally) })";
+  const started = Date.now();
+  try {
+    const model = await initChatModel(
+      process.env.MODEL ?? "openai:gpt-5.6-luna",
+      { useResponsesApi: true },
+    );
+    const agent = createDeepAgent({
+      model,
+      tools: [],
+      systemPrompt: readFileSync(
+        new URL("./reduce-skeptic.md", import.meta.url),
+        "utf8",
+      ),
+      responseFormat: providerStrategy(tallySchema),
+    });
+    const result = (await agent.invoke({
+      messages: [
+        new HumanMessage(
+          `Query: ${input.query}\n\nSkeptic corpus:\n${dump(input.corpus)}`,
+        ),
+      ],
+    })) as { structuredResponse?: unknown; messages: unknown[] };
+    await awaitAllCallbacks();
+    return {
+      ok: true,
+      ms: Date.now() - started,
+      snippet,
+      tokens: tokensOf(result.messages),
+      value: result.structuredResponse ?? { items: [] },
+    };
+  } catch (error) {
+    return fail(started, snippet, error);
+  }
+}
+
+/**
+ * Write one executive summary from the revision tally.
+ * @see {@link https://docs.langchain.com/oss/javascript/deepagents/quickstart | createDeepAgent}
+ */
+export async function runChief(input: {
+  query: string;
+  tally: unknown;
+}): Promise<CellResult> {
+  const snippet =
+    "createDeepAgent({ responseFormat: providerStrategy(brief) })";
+  const started = Date.now();
+  try {
+    const model = await initChatModel(
+      process.env.MODEL ?? "openai:gpt-5.6-luna",
+      { useResponsesApi: true },
+    );
+    const agent = createDeepAgent({
+      model,
+      tools: [],
+      systemPrompt: readFileSync(
+        new URL("./chief.md", import.meta.url),
+        "utf8",
+      ),
+      responseFormat: providerStrategy(chiefSchema),
+    });
+    const result = (await agent.invoke({
+      messages: [
+        new HumanMessage(
+          `Query: ${input.query}\n\nRevision tally:\n${dump(input.tally)}`,
+        ),
+      ],
+    })) as { structuredResponse?: unknown; messages: unknown[] };
+    await awaitAllCallbacks();
+    return {
+      ok: true,
+      ms: Date.now() - started,
+      snippet,
+      tokens: tokensOf(result.messages),
+      value: result.structuredResponse,
+    };
+  } catch (error) {
+    return fail(started, snippet, error);
+  }
+}
+
+export function fail(started: number, snippet: string, error: unknown): CellResult {
   return {
     ok: false,
     ms: Date.now() - started,
@@ -343,7 +497,7 @@ function fail(started: number, snippet: string, error: unknown): CellResult {
   };
 }
 
-function dump(value: unknown) {
+export function dump(value: unknown) {
   return typeof value === "string" ? value : JSON.stringify(value, null, 2);
 }
 
@@ -354,7 +508,7 @@ function contentOf(message: unknown) {
   return message.content;
 }
 
-function tokensOf(messages: unknown[]): Tokens {
+export function tokensOf(messages: unknown[]): Tokens {
   let input = 0;
   let output = 0;
   let total = 0;
@@ -416,4 +570,8 @@ export function isToolsId(value: string): value is ToolsId {
 
 export function isPhase(value: string): value is Phase {
   return value === "research" || value === "skeptic" || value === "revise";
+}
+
+export function isBriefPhase(value: string): value is BriefPhase {
+  return value === "reduce" || value === "chief";
 }
